@@ -1,0 +1,29 @@
+name: Test specific version input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          version: '2.1.0'
+      - name: Assert kotlinc is available
+        run: |
+          echo "Checking kotlinc is on PATH..."
+          if ! command -v kotlinc &>/dev/null; then
+            echo "FAIL: kotlinc not found on PATH"
+            exit 1
+          fi
+          echo "PASS: kotlinc found at $(command -v kotlinc)"
+      - name: Assert correct version is installed
+        run: |
+          VERSION=$(kotlinc -version 2>&1 || true)
+          echo "kotlinc version output: $VERSION"
+          if ! echo "$VERSION" | grep -q "2.1.0"; then
+            echo "FAIL: expected version 2.1.0 in output, got: $VERSION"
+            exit 1
+          fi
+          echo "PASS: version 2.1.0 confirmed"
