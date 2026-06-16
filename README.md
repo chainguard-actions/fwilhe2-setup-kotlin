@@ -8,6 +8,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
+| v1.4 | [`v1.4`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v1.4) | [`f554add`](https://github.com/fwilhe2/setup-kotlin/commit/f554add4ba7f8d60028d3e2bbaf9ef7977c4513e) |
 | v1.7 | [`v1.7`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v1.7) | [`6e5654f`](https://github.com/fwilhe2/setup-kotlin/commit/6e5654f13cb75623925de4ae8daeb6399673554a) |
 | v1.8 | [`v1.8`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v1.8) | [`7163c92`](https://github.com/fwilhe2/setup-kotlin/commit/7163c92e0f906bdf586bd76b14143aa61d6b49e4) |
 
