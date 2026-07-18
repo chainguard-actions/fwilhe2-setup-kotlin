@@ -1,0 +1,37 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: 'Version component to increment'
+        required: true
+        default: 'minor'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Get Version Number
+        uses: fwilhe2/bump-version@76445810c45e953d0e96b8128748a8f841415d03 # main
+        id: bump
+        with:
+          component: ${{ github.event.inputs.component }}
+
+      - name: Print new version number
+        env:
+          NEW_VERSION: ${{ steps.bump.outputs.newVersion }}
+        run: echo "New Version Number $NEW_VERSION"
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_VERSION: ${{ steps.bump.outputs.newVersion }}
+        run: |
+          gh release create "$NEW_VERSION" --title "Release $NEW_VERSION" --generate-notes

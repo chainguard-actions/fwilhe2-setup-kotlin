@@ -1,0 +1,61 @@
+name: Update dist and push
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Target branch to create/update and push the changes'
+        required: true
+        default: 'update-dist'
+
+permissions:
+  contents: write
+
+jobs:
+  update-dist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ inputs.branch }}
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '24.x'
+      - run: |
+          npm ci
+      - run: |
+          npm run all
+
+      - name: Show dist changes (for debugging)
+        run: |
+          echo "Files in dist (if any):"
+          ls -la dist || true
+          echo "Git status:"
+          git status --porcelain
+
+      - name: Commit and push dist (if changed)
+        env:
+          TARGET_BRANCH: ${{ inputs.branch }}
+        run: |
+          # Stage all changes under dist
+          git add -A dist || true
+
+          # If there are no staged changes, exit successfully
+          if git diff --cached --quiet; then
+            echo "No changes in dist to commit."
+            exit 0
+          fi
+
+          # Commit and push. Include [skip ci] to avoid triggering CI loops.
+          git commit -m "chore(dist): update dist [skip ci]"
+          git push --set-upstream origin "${TARGET_BRANCH}"

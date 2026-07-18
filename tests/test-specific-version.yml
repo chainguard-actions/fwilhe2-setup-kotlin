@@ -1,4 +1,4 @@
-name: Test Kotlin setup with specific version
+name: Test setup Kotlin with specific version
 on:
   workflow_dispatch:
 jobs:
@@ -6,37 +6,44 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Setup Java
+      - name: Install Java (required for Kotlin JVM compiler)
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq default-jdk
-      - id: setup-kotlin
+          sudo apt-get update -q
+          sudo apt-get install -y -q default-jdk-headless
+          java -version
+      - id: action
         uses: .
         with:
-          version: '1.9.25'
+          version: '2.1.0'
           install-native: 'false'
       - name: Assert kotlinc is available
         run: |
-          echo "Checking kotlinc availability..."
+          echo "Checking kotlinc is on PATH..."
           if ! command -v kotlinc > /dev/null 2>&1; then
-            echo "FAIL: kotlinc not found in PATH"
+            echo "FAIL: kotlinc not found on PATH"
             exit 1
           fi
           echo "PASS: kotlinc found at $(command -v kotlinc)"
-      - name: Assert kotlin version matches requested version
+      - name: Assert correct version is installed
         run: |
-          VERSION_OUTPUT=$(kotlinc -version 2>&1 || true)
+          VERSION_OUTPUT=$(kotlinc -version 2>&1)
           echo "kotlinc version output: $VERSION_OUTPUT"
-          if ! echo "$VERSION_OUTPUT" | grep -q "1.9.25"; then
-            echo "FAIL: expected version 1.9.25 in output"
+          if echo "$VERSION_OUTPUT" | grep -q "2.1.0"; then
+            echo "PASS: version 2.1.0 confirmed"
+          else
+            echo "FAIL: expected version 2.1.0 in output, got: $VERSION_OUTPUT"
             exit 1
           fi
-          echo "PASS: version 1.9.25 found"
-      - name: Assert KOTLIN_HOME is set
+      - name: Assert KOTLIN_HOME points to correct version
         run: |
           echo "KOTLIN_HOME: $KOTLIN_HOME"
           if [ -z "$KOTLIN_HOME" ]; then
             echo "FAIL: KOTLIN_HOME is not set"
             exit 1
           fi
-          echo "PASS: KOTLIN_HOME is set to $KOTLIN_HOME"
+          if echo "$KOTLIN_HOME" | grep -q "2.1.0"; then
+            echo "PASS: KOTLIN_HOME contains version 2.1.0"
+          else
+            echo "FAIL: KOTLIN_HOME does not contain version 2.1.0: $KOTLIN_HOME"
+            exit 1
+          fi

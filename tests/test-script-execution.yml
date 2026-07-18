@@ -1,4 +1,4 @@
-name: Test Kotlin setup with script execution
+name: Test Kotlin script execution
 on:
   workflow_dispatch:
 jobs:
@@ -6,30 +6,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Setup Java
+      - name: Install Java (required for Kotlin JVM compiler)
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq default-jdk
-      - id: setup-kotlin
+          sudo apt-get update -q
+          sudo apt-get install -y -q default-jdk-headless
+          java -version
+      - id: action
         uses: .
         with:
-          version: '2.0.21'
+          version: '2.1.0'
           install-native: 'false'
-          script: |
-            println("Hello from Kotlin script!")
+          script: 'println("Hello from Kotlin script!")'
       - name: Assert kotlinc is available after script execution
         run: |
-          echo "Checking kotlinc availability..."
+          echo "Checking kotlinc is on PATH..."
           if ! command -v kotlinc > /dev/null 2>&1; then
-            echo "FAIL: kotlinc not found in PATH"
+            echo "FAIL: kotlinc not found on PATH"
             exit 1
           fi
           echo "PASS: kotlinc found at $(command -v kotlinc)"
-      - name: Assert script file was created by the action
+      - name: Assert script output file was created
         run: |
-          echo "Checking that script.main.kts was created by the action..."
+          echo "Checking that script.main.kts was created..."
           if [ ! -f "script.main.kts" ]; then
-            echo "FAIL: script.main.kts not found"
+            echo "FAIL: script.main.kts was not created"
             exit 1
           fi
           echo "PASS: script.main.kts exists"

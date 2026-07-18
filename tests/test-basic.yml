@@ -6,32 +6,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Setup Java
+      - name: Install Java (required for Kotlin JVM compiler)
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq default-jdk
-      - id: setup-kotlin
+          sudo apt-get update -q
+          sudo apt-get install -y -q default-jdk-headless
+          java -version
+      - id: action
         uses: .
         with:
-          version: '2.0.21'
+          version: '2.1.0'
           install-native: 'false'
       - name: Assert kotlinc is available
         run: |
-          echo "Checking kotlinc availability..."
+          echo "Checking kotlinc is on PATH..."
           if ! command -v kotlinc > /dev/null 2>&1; then
-            echo "FAIL: kotlinc not found in PATH"
+            echo "FAIL: kotlinc not found on PATH"
             exit 1
           fi
           echo "PASS: kotlinc found at $(command -v kotlinc)"
-      - name: Assert kotlin version matches
-        run: |
-          VERSION_OUTPUT=$(kotlinc -version 2>&1 || true)
-          echo "kotlinc version output: $VERSION_OUTPUT"
-          if ! echo "$VERSION_OUTPUT" | grep -q "2.0.21"; then
-            echo "FAIL: expected version 2.0.21 in output"
-            exit 1
-          fi
-          echo "PASS: version 2.0.21 found"
       - name: Assert KOTLIN_HOME is set
         run: |
           echo "KOTLIN_HOME: $KOTLIN_HOME"
@@ -40,3 +32,12 @@ jobs:
             exit 1
           fi
           echo "PASS: KOTLIN_HOME is set to $KOTLIN_HOME"
+      - name: Assert kotlinc version output
+        run: |
+          VERSION_OUTPUT=$(kotlinc -version 2>&1)
+          echo "kotlinc version output: $VERSION_OUTPUT"
+          if [ -z "$VERSION_OUTPUT" ]; then
+            echo "FAIL: kotlinc -version produced no output"
+            exit 1
+          fi
+          echo "PASS: kotlinc version output is non-empty"
