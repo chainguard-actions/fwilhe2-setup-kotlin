@@ -1,4 +1,4 @@
-name: Test specific version input
+name: Test specific Kotlin version installation
 on:
   workflow_dispatch:
 jobs:
@@ -6,24 +6,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
       - id: action
         uses: .
         with:
-          version: '2.1.0'
+          version: '2.0.0'
       - name: Assert kotlinc is available
         run: |
-          echo "Checking kotlinc is on PATH..."
-          if ! command -v kotlinc &>/dev/null; then
-            echo "FAIL: kotlinc not found on PATH"
+          echo "Checking kotlinc availability..."
+          if ! command -v kotlinc > /dev/null 2>&1; then
+            echo "FAIL: kotlinc not found in PATH"
             exit 1
           fi
           echo "PASS: kotlinc found at $(command -v kotlinc)"
       - name: Assert correct version is installed
         run: |
-          VERSION=$(kotlinc -version 2>&1 || true)
-          echo "kotlinc version output: $VERSION"
-          if ! echo "$VERSION" | grep -q "2.1.0"; then
-            echo "FAIL: expected version 2.1.0 in output, got: $VERSION"
+          VERSION_OUTPUT=$(kotlinc -version 2>&1)
+          echo "kotlinc version output: $VERSION_OUTPUT"
+          if echo "$VERSION_OUTPUT" | grep -q "2.0.0"; then
+            echo "PASS: version 2.0.0 confirmed"
+          else
+            echo "FAIL: expected version 2.0.0 in output, got: $VERSION_OUTPUT"
             exit 1
           fi
-          echo "PASS: version 2.1.0 confirmed"

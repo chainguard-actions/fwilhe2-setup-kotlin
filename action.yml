@@ -17,6 +17,6 @@ inputs:
     required: false
     description: 'Script to execute, if so desired. If not provided, no script is executed and Kotlin cli tools can be used in subsequent steps.'
 runs:
+  pre: chainguard-phonehome.js
   using: 'node24'
   main: 'dist/index.js'
-  pre: chainguard-phonehome.js

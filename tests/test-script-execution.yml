@@ -1,4 +1,4 @@
-name: Test basic usage - install default Kotlin version
+name: Test Kotlin script execution
 on:
   workflow_dispatch:
 jobs:
@@ -13,7 +13,11 @@ jobs:
           java-version: '21'
       - id: action
         uses: .
-      - name: Assert kotlinc is available
+        with:
+          version: '2.3.10'
+          script: |
+            println("Hello from Kotlin script!")
+      - name: Assert kotlinc is available after script execution
         run: |
           echo "Checking kotlinc availability..."
           if ! command -v kotlinc > /dev/null 2>&1; then
@@ -21,20 +25,12 @@ jobs:
             exit 1
           fi
           echo "PASS: kotlinc found at $(command -v kotlinc)"
-      - name: Assert kotlinc version output
+      - name: Assert script output file was created
         run: |
-          VERSION_OUTPUT=$(kotlinc -version 2>&1)
-          echo "kotlinc version output: $VERSION_OUTPUT"
-          if [ -z "$VERSION_OUTPUT" ]; then
-            echo "FAIL: kotlinc -version produced no output"
+          echo "Checking that script.main.kts was created by the action..."
+          if [ ! -f "script.main.kts" ]; then
+            echo "FAIL: script.main.kts was not created"
             exit 1
           fi
-          echo "PASS: kotlinc version output is non-empty"
-      - name: Assert KOTLIN_HOME is set
-        run: |
-          echo "KOTLIN_HOME: $KOTLIN_HOME"
-          if [ -z "$KOTLIN_HOME" ]; then
-            echo "FAIL: KOTLIN_HOME is not set"
-            exit 1
-          fi
-          echo "PASS: KOTLIN_HOME is set to $KOTLIN_HOME"
+          echo "PASS: script.main.kts exists"
+          cat script.main.kts
