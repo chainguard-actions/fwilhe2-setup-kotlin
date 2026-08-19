@@ -1,4 +1,4 @@
-name: Test script execution
+name: Test Kotlin setup with script execution
 on:
   workflow_dispatch:
 jobs:
@@ -6,21 +6,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Create a simple Kotlin script
+      - name: Install Java
         run: |
-          cat > /tmp/hello.main.kts <<'EOF'
-          println("Hello from Kotlin script!")
-          EOF
-      - id: action
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq default-jdk
+          java -version
+      - id: setup-kotlin
         uses: .
         with:
-          version: '2.3.10'
-          script: '/tmp/hello.main.kts'
+          version: '2.1.0'
+          script: |
+            println("Hello from Kotlin script!")
       - name: Assert kotlinc is available after script run
         run: |
-          echo "Checking kotlinc is on PATH..."
-          if ! command -v kotlinc &>/dev/null; then
-            echo "FAIL: kotlinc not found on PATH"
+          echo "Checking kotlinc availability..."
+          if ! command -v kotlinc >/dev/null 2>&1; then
+            echo "FAIL: kotlinc not found in PATH"
             exit 1
           fi
           echo "PASS: kotlinc found at $(command -v kotlinc)"
+      - name: Assert KOTLIN_HOME is set
+        run: |
+          echo "KOTLIN_HOME: $KOTLIN_HOME"
+          if [ -z "$KOTLIN_HOME" ]; then
+            echo "FAIL: KOTLIN_HOME is not set"
+            exit 1
+          fi
+          echo "PASS: KOTLIN_HOME is set to $KOTLIN_HOME"

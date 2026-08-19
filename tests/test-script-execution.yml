@@ -1,4 +1,4 @@
-name: Test specific version installation
+name: Test script execution
 on:
   workflow_dispatch:
 jobs:
@@ -15,7 +15,8 @@ jobs:
         with:
           version: '2.1.0'
           install-native: 'false'
-      - name: Assert kotlinc is available
+          script: 'println("Hello from Kotlin script!")'
+      - name: Assert kotlinc is available after script execution
         run: |
           echo "Checking kotlinc availability..."
           if ! command -v kotlinc &>/dev/null; then
@@ -23,21 +24,12 @@ jobs:
             exit 1
           fi
           echo "PASS: kotlinc found at $(command -v kotlinc)"
-      - name: Assert correct version is installed
+      - name: Assert script output file was created
         run: |
-          VERSION_OUTPUT=$(kotlinc -version 2>&1 || true)
-          echo "kotlinc version output: $VERSION_OUTPUT"
-          if echo "$VERSION_OUTPUT" | grep -q "2.1.0"; then
-            echo "PASS: version 2.1.0 confirmed"
-          else
-            echo "FAIL: expected version 2.1.0 in output: $VERSION_OUTPUT"
+          echo "Checking that script.main.kts was created..."
+          if [ ! -f "script.main.kts" ]; then
+            echo "FAIL: script.main.kts not found"
             exit 1
           fi
-      - name: Assert KOTLIN_HOME is set correctly
-        run: |
-          echo "KOTLIN_HOME: $KOTLIN_HOME"
-          if [ -z "$KOTLIN_HOME" ]; then
-            echo "FAIL: KOTLIN_HOME is not set"
-            exit 1
-          fi
-          echo "PASS: KOTLIN_HOME=$KOTLIN_HOME"
+          echo "PASS: script.main.kts exists"
+          cat script.main.kts

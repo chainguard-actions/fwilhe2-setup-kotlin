@@ -1,0 +1,144 @@
+name: 'build-test'
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '24.x'
+      - run: |
+          npm ci
+      - run: |
+          npm run all
+        env:
+          INPUT_VERSION: 2.3.10
+          INPUT_INSTALL-NATIVE: false
+      - run: |
+          git diff --name-only --exit-code
+      - run: |
+          node dist/index.js
+
+          if ! [ -x "$(command -v kotlinc)" ]; then
+            echo 'Error: Expected kotlinc to be installed.' >&2
+            exit 1
+          fi
+        env:
+          INPUT_VERSION: 2.3.10
+          INPUT_INSTALL-NATIVE: false
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '24.x'
+      - uses: ./
+
+  test-with-arg:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '24.x'
+      - uses: ./
+        with:
+          version: 2.3.10
+          script: |
+            #!/usr/bin/env kotlin
+            fun getInput(name: String): String {
+                return System.getenv("INPUT_${name.replace(" ", "_").uppercase()}")
+            }
+            if (getInput("version") != "2.3.10") {
+              throw RuntimeException("Expected version 2.3.10")
+            }
+
+  test-with-arg-default-version:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '24.x'
+      - uses: ./
+        with:
+          script: |
+            #!/usr/bin/env kotlin
+            fun getInput(name: String): String {
+                return System.getenv("INPUT_${name.replace(" ", "_").uppercase()}")
+            }
+            if (getInput("version") != "2.3.10") {
+              throw RuntimeException("Expected version 2.3.10")
+            }
+
+  test-with-native:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: '24.x'
+      - uses: ./
+        with:
+          version: 2.3.10
+          install-native: true
+      - run: kotlinc -version
+      - run: kotlinc-native -version
+      - run: echo 'fun main() {println("Hello Kotlin/Native!")}' > hello.kt
+      - run: kotlinc-native hello.kt
+      - run: ./program.exe
+        if: ${{ matrix.os == 'windows-latest' }}
+      - run: ./program.kexe
+        if: ${{ matrix.os != 'windows-latest' }}
+
+  validate-typings:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: typesafegithub/github-actions-typing@9ddf35b71a482be7d8922b28e8d00df16b77e315 # v2.2.2
