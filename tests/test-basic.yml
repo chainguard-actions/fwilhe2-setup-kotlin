@@ -1,4 +1,4 @@
-name: Test basic usage - default version
+name: Test basic Kotlin setup (default version)
 on:
   workflow_dispatch:
 jobs:
@@ -6,22 +6,44 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - id: action
+      - name: Ensure Java is available
+        run: |
+          if command -v java >/dev/null 2>&1; then
+            echo "Java already available"
+            java -version 2>&1
+          else
+            echo "Java not found, installing..."
+            sudo apt-get update -qq || apt-get update -qq
+            sudo apt-get install -y -qq default-jdk-headless || apt-get install -y -qq default-jdk-headless
+            java -version 2>&1
+          fi
+      - id: setup-kotlin
         uses: .
+        with:
+          version: '2.2.21'
+          install-native: 'false'
       - name: Assert kotlinc is available
         run: |
-          echo "Checking kotlinc is on PATH..."
-          if ! command -v kotlinc &>/dev/null; then
-            echo "FAIL: kotlinc not found on PATH"
+          echo "Checking kotlinc availability..."
+          if ! command -v kotlinc >/dev/null 2>&1; then
+            echo "FAIL: kotlinc not found in PATH"
             exit 1
           fi
           echo "PASS: kotlinc found at $(command -v kotlinc)"
-      - name: Assert kotlin version output
+      - name: Assert kotlinc version output
         run: |
-          VERSION=$(kotlinc -version 2>&1 || true)
-          echo "kotlinc version output: $VERSION"
-          if [ -z "$VERSION" ]; then
-            echo "FAIL: kotlinc -version returned empty output"
+          VERSION_OUTPUT=$(kotlinc -version 2>&1 || true)
+          echo "kotlinc version output: $VERSION_OUTPUT"
+          if [ -z "$VERSION_OUTPUT" ]; then
+            echo "FAIL: kotlinc -version produced no output"
             exit 1
           fi
-          echo "PASS"
+          echo "PASS: kotlinc version output is non-empty"
+      - name: Assert kotlin script runner is available
+        run: |
+          echo "Checking kotlin availability..."
+          if ! command -v kotlin >/dev/null 2>&1; then
+            echo "FAIL: kotlin not found in PATH"
+            exit 1
+          fi
+          echo "PASS: kotlin found at $(command -v kotlin)"

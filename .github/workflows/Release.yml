@@ -1,0 +1,32 @@
+name: Release
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: release
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+    - name: Get Version Number
+      uses: fwilhe2/bump-version@c6a73db2f99dd2bc980e85dd15fbdcccac8bc8e5 # main
+      id: bump
+
+    - name: Print Version Number
+      env:
+        NEW_VERSION: ${{ steps.bump.outputs.newVersion }}
+      run: echo "New Version Number $NEW_VERSION"
+
+    - name: Create Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NEW_VERSION: ${{ steps.bump.outputs.newVersion }}
+      run: |
+        gh release create "$NEW_VERSION" --title "Release $NEW_VERSION" --generate-notes

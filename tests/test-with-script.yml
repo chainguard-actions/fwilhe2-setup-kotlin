@@ -1,0 +1,37 @@
+name: Test with script execution
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Ensure Java is available
+        run: |
+          if ! command -v java &>/dev/null; then
+            echo "Java not found, installing..."
+            apt-get update -qq
+            apt-get install -y -qq default-jdk
+          fi
+          java -version
+      - id: setup-kotlin
+        uses: .
+        with:
+          version: '2.0.0'
+          script: 'println("Hello from Kotlin script!")'
+      - name: Assert kotlinc is available after script execution
+        run: |
+          echo "Checking kotlinc availability..."
+          if ! command -v kotlinc &>/dev/null; then
+            echo "FAIL: kotlinc not found in PATH"
+            exit 1
+          fi
+          echo "PASS: kotlinc found at $(command -v kotlinc)"
+      - name: Assert KOTLIN_HOME is set
+        run: |
+          echo "KOTLIN_HOME: $KOTLIN_HOME"
+          if [ -z "$KOTLIN_HOME" ]; then
+            echo "FAIL: KOTLIN_HOME is not set"
+            exit 1
+          fi
+          echo "PASS: KOTLIN_HOME is set to $KOTLIN_HOME"

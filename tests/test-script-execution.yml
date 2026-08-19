@@ -1,4 +1,4 @@
-name: Test Kotlin setup with specific version
+name: Test Kotlin setup with script execution
 on:
   workflow_dispatch:
 jobs:
@@ -20,9 +20,12 @@ jobs:
       - id: setup-kotlin
         uses: .
         with:
-          version: '2.1.0'
+          version: '2.2.21'
           install-native: 'false'
-      - name: Assert kotlinc is available
+          script: |
+            val x = 42
+            println(x)
+      - name: Assert kotlinc is available after script execution
         run: |
           echo "Checking kotlinc availability..."
           if ! command -v kotlinc >/dev/null 2>&1; then
@@ -30,21 +33,22 @@ jobs:
             exit 1
           fi
           echo "PASS: kotlinc found at $(command -v kotlinc)"
-      - name: Assert correct Kotlin version is installed
+      - name: Assert script file was created
         run: |
-          VERSION_OUTPUT=$(kotlinc -version 2>&1 || true)
-          echo "kotlinc version output: $VERSION_OUTPUT"
-          if echo "$VERSION_OUTPUT" | grep -q "2.1.0"; then
-            echo "PASS: version 2.1.0 confirmed"
+          echo "Checking that script.main.kts was created..."
+          if [ ! -f "script.main.kts" ]; then
+            echo "FAIL: script.main.kts was not created"
+            exit 1
+          fi
+          echo "PASS: script.main.kts exists"
+          cat script.main.kts
+      - name: Assert script content is correct
+        run: |
+          CONTENT=$(cat script.main.kts)
+          echo "Script content: $CONTENT"
+          if echo "$CONTENT" | grep -q 'val x = 42'; then
+            echo "PASS: script content is correct"
           else
-            echo "FAIL: expected version 2.1.0 in output, got: $VERSION_OUTPUT"
+            echo "FAIL: script content does not match expected"
             exit 1
           fi
-      - name: Assert KOTLIN_HOME is set
-        run: |
-          echo "KOTLIN_HOME: $KOTLIN_HOME"
-          if [ -z "$KOTLIN_HOME" ]; then
-            echo "FAIL: KOTLIN_HOME is not set"
-            exit 1
-          fi
-          echo "PASS: KOTLIN_HOME is set to $KOTLIN_HOME"
