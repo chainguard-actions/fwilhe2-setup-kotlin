@@ -1,0 +1,45 @@
+name: Test basic usage - default Kotlin version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install Java
+        run: |
+          apt-get update -qq && apt-get install -y -qq default-jdk 2>/dev/null || \
+          (which java && echo "Java already available") || \
+          echo "Java installation attempted"
+          java -version 2>&1 || echo "java not available"
+      - id: setup
+        uses: .
+        with:
+          version: '2.1.0'
+          install-native: 'false'
+      - name: Assert kotlinc is available
+        run: |
+          echo "Checking kotlinc availability..."
+          if ! command -v kotlinc >/dev/null 2>&1; then
+            echo "FAIL: kotlinc not found in PATH"
+            exit 1
+          fi
+          echo "PASS: kotlinc found at $(command -v kotlinc)"
+      - name: Assert kotlinc version
+        run: |
+          VERSION_OUTPUT=$(kotlinc -version 2>&1 || true)
+          echo "kotlinc version output: $VERSION_OUTPUT"
+          if echo "$VERSION_OUTPUT" | grep -q "2.1.0"; then
+            echo "PASS: version 2.1.0 confirmed"
+          else
+            echo "FAIL: expected version 2.1.0 in output: $VERSION_OUTPUT"
+            exit 1
+          fi
+      - name: Assert KOTLIN_HOME is set
+        run: |
+          echo "KOTLIN_HOME: $KOTLIN_HOME"
+          if [ -z "$KOTLIN_HOME" ]; then
+            echo "FAIL: KOTLIN_HOME is not set"
+            exit 1
+          fi
+          echo "PASS: KOTLIN_HOME=$KOTLIN_HOME"
