@@ -6,13 +6,13 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 ## Versions
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v1.4 | [`v1.4`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v1.4) | [`f554add`](https://github.com/fwilhe2/setup-kotlin/commit/f554add4ba7f8d60028d3e2bbaf9ef7977c4513e) |
-| v1.7 | [`v1.7`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v1.7) | [`6e5654f`](https://github.com/fwilhe2/setup-kotlin/commit/6e5654f13cb75623925de4ae8daeb6399673554a) |
-| v1.8 | [`v1.8`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v1.8) | [`7163c92`](https://github.com/fwilhe2/setup-kotlin/commit/7163c92e0f906bdf586bd76b14143aa61d6b49e4) |
-| v2.0 | [`v2.0`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v2.0) | [`ee96925`](https://github.com/fwilhe2/setup-kotlin/commit/ee9692514da313706b193d808526812102a344e4) |
-| v2.1 | [`v2.1`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v2.1) | [`b325539`](https://github.com/fwilhe2/setup-kotlin/commit/b325539ca8f6e1d9ee04efed06f49bdbf5426dbb) |
+| Version | Tag | Upstream commit | Hardening report |
+|---------|-----|-----------------|------------------|
+| v1.4 | [`v1.4`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v1.4) | [`f554add`](https://github.com/fwilhe2/setup-kotlin/commit/f554add4ba7f8d60028d3e2bbaf9ef7977c4513e) | [`HARDENING.md`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/blob/v1.4/HARDENING.md) |
+| v1.7 | [`v1.7`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v1.7) | [`6e5654f`](https://github.com/fwilhe2/setup-kotlin/commit/6e5654f13cb75623925de4ae8daeb6399673554a) | [`HARDENING.md`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/blob/v1.7/HARDENING.md) |
+| v1.8 | [`v1.8`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v1.8) | [`7163c92`](https://github.com/fwilhe2/setup-kotlin/commit/7163c92e0f906bdf586bd76b14143aa61d6b49e4) | [`HARDENING.md`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/blob/v1.8/HARDENING.md) |
+| v2.0 | [`v2.0`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v2.0) | [`ee96925`](https://github.com/fwilhe2/setup-kotlin/commit/ee9692514da313706b193d808526812102a344e4) | [`HARDENING.md`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/blob/v2.0/HARDENING.md) |
+| v2.1 | [`v2.1`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/tree/v2.1) | [`b325539`](https://github.com/fwilhe2/setup-kotlin/commit/b325539ca8f6e1d9ee04efed06f49bdbf5426dbb) | [`HARDENING.md`](https://github.com/chainguard-actions/fwilhe2-setup-kotlin/blob/v2.1/HARDENING.md) |
 
 ## Privacy
 
